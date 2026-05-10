@@ -1,4 +1,4 @@
-.PHONY: up down clean logs gen-secret hash-password send-tcp send-udp health
+.PHONY: up down clean logs fluentd gen-secret hash-password send-tcp send-udp health
 
 GRAYLOG_HOST ?= 127.0.0.1
 CEF_PORT     ?= 5514
