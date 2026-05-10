@@ -1,0 +1,85 @@
+services:
+
+  # ── Storage ──────────────────────────────────────────────────────────────────
+
+  mongodb:
+    image: mongo:${MONGO_VERSION:-7.0}
+    container_name: mongodb
+    volumes:
+      - mongodb-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')", "--quiet"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  opensearch:
+    image: opensearchproject/opensearch:${OPENSEARCH_VERSION:-2.17.0}
+    container_name: opensearch
+    environment:
+      - cluster.name=graylog
+      - node.name=opensearch-node1
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g"
+      - DISABLE_INSTALL_DEMO_CONFIG=true
+      - DISABLE_SECURITY_PLUGIN=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - opensearch-data:/usr/share/opensearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health | grep -q '\"status\":\"green\"\\|\"status\":\"yellow\"'"]
+      interval: 20s
+      timeout: 10s
+      retries: 10
+    restart: unless-stopped
+
+  # ── Graylog ──────────────────────────────────────────────────────────────────
+
+  graylog:
+    image: graylog/graylog:${GRAYLOG_VERSION:-6.1}
+    container_name: graylog
+    environment:
+      GRAYLOG_PASSWORD_SECRET: ${GRAYLOG_PASSWORD_SECRET}
+      GRAYLOG_ROOT_PASSWORD_SHA2: ${GRAYLOG_ROOT_PASSWORD_SHA2}
+      GRAYLOG_HTTP_EXTERNAL_URI: ${GRAYLOG_HTTP_EXTERNAL_URI:-http://127.0.0.1:9000/}
+      GRAYLOG_MONGODB_URI: mongodb://mongodb:27017/graylog
+      GRAYLOG_ELASTICSEARCH_HOSTS: http://opensearch:9200
+    ports:
+      - "9000:9000"             # Graylog web UI
+      - "${CEF_PORT:-5514}:5514"        # CEF TCP
+      - "${CEF_PORT:-5514}:5514/udp"    # CEF UDP
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      opensearch:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── Optional Fluentd end-to-end test ─────────────────────────────────────────
+  # Start with: docker compose --profile fluentd up fluentd
+
+  fluentd:
+    profiles: ["fluentd"]
+    build: ./fluentd
+    container_name: fluentd
+    volumes:
+      - ./fluentd:/fluentd/etc
+      - ./samples:/fluentd/samples
+    environment:
+      GRAYLOG_HOST: graylog
+      GRAYLOG_CEF_PORT: "5514"
+    depends_on:
+      - graylog
+    restart: on-failure
+
+volumes:
+  mongodb-data:
+  opensearch-data:

@@ -1,0 +1,21 @@
+# Sample CEF events for Graylog CEF Lab
+# One event per line. Blank lines and lines starting with # are ignored by send scripts.
+# Send with: make send-tcp  OR  make send-udp
+
+# ── Login failed ────────────────────────────────────────────────────────────────
+CEF:0|AcmeCorp|PlatformAuth|1.0|AUTH-001|Login Failed|8|src=203.0.113.42 dst=10.0.1.5 suser=bob.smith duser=bob.smith msg=Invalid password attempt rt=1715340001000 cs1=production cs1Label=namespace cs2=auth-service cs2Label=service cs3=auth-service-7d4f8b-xk2p9 cs3Label=pod cs4=req-abc123 cs4Label=trace_id
+
+# ── Login success ───────────────────────────────────────────────────────────────
+CEF:0|AcmeCorp|PlatformAuth|1.0|AUTH-002|Login Success|5|src=198.51.100.10 dst=10.0.1.5 suser=alice.jones duser=alice.jones msg=User authenticated successfully rt=1715340005000 cs1=production cs1Label=namespace cs2=auth-service cs2Label=service cs3=auth-service-7d4f8b-xk2p9 cs3Label=pod cs4=req-def456 cs4Label=trace_id
+
+# ── HTTP request error (4xx) ─────────────────────────────────────────────────────
+CEF:0|AcmeCorp|WebGateway|2.3|HTTP-400|HTTP Bad Request|6|src=198.51.100.55 dst=10.0.2.10 suser=- duser=- msg=GET /api/orders returned 400 Bad Request rt=1715340010000 cs1=production cs1Label=namespace cs2=api-gateway cs2Label=service cs3=api-gateway-5c9f7d-mn3r1 cs3Label=pod cs4=req-ghi789 cs4Label=trace_id
+
+# ── Application error ────────────────────────────────────────────────────────────
+CEF:0|AcmeCorp|OrderService|1.5|APP-500|Application Error|8|src=10.0.3.22 dst=10.0.3.30 suser=system duser=- msg=NullPointerException in OrderProcessor.process() rt=1715340020000 cs1=production cs1Label=namespace cs2=order-service cs2Label=service cs3=order-service-9b2c4e-pq5s8 cs3Label=pod cs4=req-jkl012 cs4Label=trace_id
+
+# ── Kubernetes pod crash (OOMKilled) ─────────────────────────────────────────────
+CEF:0|AcmeCorp|KubernetesAudit|1.0|K8S-001|Pod Crash OOMKilled|9|src=10.0.0.1 dst=10.0.3.30 suser=kubelet duser=- msg=Container order-service OOMKilled\; exit code 137 rt=1715340030000 cs1=production cs1Label=namespace cs2=order-service cs2Label=service cs3=order-service-9b2c4e-pq5s8 cs3Label=pod cs4=- cs4Label=trace_id
+
+# ── Database connection failure ───────────────────────────────────────────────────
+CEF:0|AcmeCorp|OrderService|1.5|DB-001|Database Connection Failed|9|src=10.0.3.30 dst=10.0.4.100 suser=app_user duser=- msg=Could not acquire connection from pool after 30s\; pool exhausted rt=1715340040000 cs1=production cs1Label=namespace cs2=order-service cs2Label=service cs3=order-service-9b2c4e-pq5s8 cs3Label=pod cs4=req-mno345 cs4Label=trace_id
