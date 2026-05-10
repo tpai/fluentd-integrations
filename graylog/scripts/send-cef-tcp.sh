@@ -26,7 +26,7 @@ while IFS= read -r line || [[ -n "$line" ]]; do
   [[ -z "$line" || "$line" == \#* ]] && continue
 
   echo "  → ${line:0:100}..."
-  printf '%s\n' "$line" | nc -q 1 "$HOST" "$PORT"
+  printf '%s\n' "$line" | nc "$HOST" "$PORT"
   count=$((count + 1))
   sleep 0.2
 done < "$SAMPLES_FILE"
