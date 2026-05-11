@@ -15,3 +15,6 @@ Collect application logs using Fluentd and send them to OpenSearch.
 
 ### [Splunk HEC](./splunk-hec/)
 Collect logs with Fluentd and send them to Splunk using HTTP Event Collector (HEC).
+
+### [Graylog](./graylog/)
+Validate CEF (Common Event Format) log delivery and parsing using Fluentd and Graylog with a CEF TCP input.

@@ -16,7 +16,34 @@ A collection of self-contained Docker Compose examples showing how to ship logs 
   screenshot.png
 ```
 
-Current backends: `elasticsearch`, `loki`, `opensearch`, `splunk-hec`.
+Current backends: `elasticsearch`, `loki`, `opensearch`, `splunk-hec`, `graylog`.
+
+The `graylog` example is a CEF-focused lab with an extended layout:
+
+```
+graylog/
+  docker-compose.yml
+  Makefile                     # up / down / clean / send-tcp / health / fluentd targets
+  .env.example                 # credential placeholders (GRAYLOG_PASSWORD_SECRET, etc.)
+  fluentd/
+    Dockerfile
+    fluent.conf                # tail → CEF transform → out_exec (nc) to Graylog TCP
+  docs/
+    architecture.md
+    graylog-input-setup.md     # step-by-step: create CEF TCP input in the UI
+    cef-field-mapping.md
+    troubleshooting.md
+  samples/
+    app-logs.txt               # JSON fixtures read by Fluentd tail source
+    cef-events.txt             # raw CEF lines for manual nc tests
+  scripts/
+    gen-secret.sh
+    hash-password.sh
+    send-cef-tcp.sh            # feeds cef-events.txt to nc over TCP
+    healthcheck.sh
+```
+
+Fluentd in the Graylog example runs under the `fluentd` Compose profile (`docker compose --profile fluentd up fluentd`) and is optional — the stack validates CEF delivery via direct `nc` commands without Fluentd.
 
 ---
 
@@ -58,8 +85,10 @@ Every `fluent.conf` must follow this exact section order:
 4. <match *.**>        copy → <store> destination + <store> stdout
 ```
 
+**Exception — Graylog example:** The Graylog `fluent.conf` is a CEF lab, not a general-purpose pipeline. It uses `<source> monitor_agent` (port 24220) and `<source> tail` instead of `forward`/`http`, and a single `<match app.logs>` with `out_exec` (netcat) instead of `out_copy`. That deviation is intentional and must not be "corrected" to match the standard layout.
+
 Rules:
-- Always include both `forward` and `http` sources — they are the two standard ingestion paths.
+- Always include both `forward` and `http` sources — they are the two standard ingestion paths (standard backends only; see Graylog exception above).
 - Always mirror logs to `stdout` inside a `<store>` block so `docker compose logs fluentd` is useful during development.
 - Use `flush_interval 5s` for all output plugins unless the backend has a documented reason to differ.
 - Set `include_tag_key true` on every output plugin.
@@ -132,6 +161,9 @@ Rules:
 | Grafana | 3000 | Web UI |
 | Splunk web | 8000 | Web UI |
 | Splunk HEC | 8088 | HTTP Event Collector |
+| Graylog web | 9000 | Web UI |
+| Graylog CEF TCP | 5514 | CEF TCP input |
+| Graylog Fluentd monitor_agent | 24220 | Fluentd metrics (Graylog profile only) |
 
 Do not remap these ports unless there is a documented conflict. Consistency lets readers run multiple examples and compare them.
 
@@ -156,6 +188,6 @@ Keep it short. Do not duplicate configuration details that are already visible i
 
 - Do not refactor shared logic into a common base — each example is intentionally self-contained and copy-paste portable.
 - Do not add health checks, resource limits, or production-hardening to the Compose files unless the user explicitly asks; these are demo stacks.
-- Do not add `.env` files for secrets — the pattern is environment variables declared inline in `docker-compose.yml` with obvious placeholder values, so the example is runnable out of the box.
+- Do not add `.env` files for secrets — the pattern is environment variables declared inline in `docker-compose.yml` with obvious placeholder values, so the example is runnable out of the box. **Exception:** The Graylog example requires `.env` / `.env.example` because `GRAYLOG_PASSWORD_SECRET` and `GRAYLOG_ROOT_PASSWORD_SHA2` must be generated (not hardcoded), and `.env.example` documents that setup step.
 - Do not change `flush_interval` below `5s` — shorter intervals cause excessive write amplification in single-node demo deployments.
 - Do not upgrade the Fluentd base image without verifying the target plugin is compatible with the new version.
