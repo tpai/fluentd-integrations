@@ -8,7 +8,7 @@
                          │                                          │
   [Test scripts]         │  ┌──────────┐     ┌──────────────────┐  │
   send-cef-tcp.sh ──TCP──┼─►│          │     │                  │  │
-  send-cef-udp.sh ──UDP──┼─►│ Graylog  │────►│   OpenSearch     │  │
+                         │  │ Graylog  │────►│   OpenSearch     │  │
                          │  │  :9000   │     │   (storage)      │  │
   [Optional]             │  │  :5514   │     └──────────────────┘  │
   Fluentd ──────TCP──────┼─►│          │                           │
@@ -25,7 +25,7 @@
 
 | Component  | Role | Port |
 |------------|------|------|
-| Graylog    | CEF ingestion, parsing, search UI | 9000 (UI), 5514 (CEF TCP/UDP) |
+| Graylog    | CEF ingestion, parsing, search UI | 9000 (UI), 5514 (CEF TCP) |
 | OpenSearch | Stores and indexes parsed log events | 9200 (internal) |
 | MongoDB    | Stores Graylog configuration and metadata | 27017 (internal) |
 | Fluentd    | Optional — reads app logs, transforms to CEF, ships to Graylog | — |
@@ -58,10 +58,6 @@ app-logs.txt (JSON)
 
 Graylog 5.x/6.x is certified against OpenSearch 2.x. The API is wire-compatible with Elasticsearch 7.x, so Graylog uses the same `GRAYLOG_ELASTICSEARCH_HOSTS` env var for both. In this lab, OpenSearch runs with security disabled to simplify the local setup.
 
-## Why CEF over TCP, not UDP?
-
-TCP guarantees delivery and framing. UDP is connectionless — a dropped packet means a silently lost event. Use TCP for integration tests and debugging. Enable UDP only when the target SIEM requires it.
-
 ## CEF Message Format
 
 ```
@@ -76,6 +72,5 @@ Extensions are space-separated `key=value` pairs. Pipe characters (`|`) and back
 |------|----------|---------|---------|
 | 9000 | TCP | Graylog | Web UI and REST API |
 | 5514 | TCP | Graylog | CEF TCP Input |
-| 5514 | UDP | Graylog | CEF UDP Input |
 | 9200 | TCP | OpenSearch | REST API (internal only) |
 | 27017 | TCP | MongoDB | Driver protocol (internal only) |

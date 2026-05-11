@@ -55,7 +55,6 @@ services:
     ports:
       - "9000:9000"             # Graylog web UI
       - "${CEF_PORT:-5514}:5514"        # CEF TCP
-      - "${CEF_PORT:-5514}:5514/udp"    # CEF UDP
     depends_on:
       mongodb:
         condition: service_healthy
@@ -76,6 +75,8 @@ services:
     environment:
       GRAYLOG_HOST: graylog
       GRAYLOG_CEF_PORT: "5514"
+    ports:
+      - "24220:24220"
     depends_on:
       - graylog
     restart: on-failure

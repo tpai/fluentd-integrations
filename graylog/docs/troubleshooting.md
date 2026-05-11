@@ -91,18 +91,6 @@ And update the Graylog CEF input port to match.
 
 ---
 
-## TCP works but UDP does not
-
-UDP is connectionless — `nc -u` sends the packet but there is no confirmation. Check:
-
-1. The CEF UDP Input is created and running in Graylog UI.
-2. The port matches (5514 by default).
-3. No firewall or Docker networking rule is dropping UDP packets.
-
-If events appear via TCP but not UDP, use TCP for testing.
-
----
-
 ## CEF message appears as raw text — fields are not parsed
 
 The CEF input expects messages to start exactly with `CEF:0|`. Verify:

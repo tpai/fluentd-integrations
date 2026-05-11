@@ -5,7 +5,7 @@ A local Docker Compose environment for validating CEF (Common Event Format) log 
 ## What This Does
 
 - Verify Fluentd can generate and ship CEF-formatted logs
-- Test Graylog CEF TCP and UDP inputs end-to-end
+- Test Graylog CEF TCP input end-to-end
 - Confirm CEF extension fields (`src`, `suser`, `cs1`–`cs4`, etc.) are parsed and searchable
 
 ## Stack
@@ -62,7 +62,6 @@ See [docs/graylog-input-setup.md](docs/graylog-input-setup.md) for step-by-step 
 
 ```bash
 make send-tcp    # sends all samples/cef-events.txt over TCP
-make send-udp    # sends via UDP (requires CEF UDP input in Graylog)
 ```
 
 ### 7. Validate in Graylog Search
@@ -137,7 +136,7 @@ This repo is for **local PoC and demo only**.
 
 - Default `.env.example` credentials (`admin`/`admin`) must not be used in shared environments
 - Do not expose ports 9000 or 5514 publicly without firewall rules
-- Prefer TCP over UDP for integration tests — UDP has no delivery guarantee
+- Use TCP for integration tests — it guarantees delivery and framing
 - OpenSearch security plugin is disabled — do not expose port 9200 externally
 - TLS is not configured — enable it only if your target SIEM requires it
 

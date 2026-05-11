@@ -1,4 +1,4 @@
-.PHONY: up down clean logs fluentd gen-secret hash-password send-tcp send-udp health
+.PHONY: up down clean logs fluentd gen-secret hash-password send-tcp health
 
 GRAYLOG_HOST ?= 127.0.0.1
 CEF_PORT     ?= 5514
@@ -27,9 +27,6 @@ hash-password:
 
 send-tcp:
 	@./scripts/send-cef-tcp.sh $(GRAYLOG_HOST) $(CEF_PORT)
-
-send-udp:
-	@./scripts/send-cef-udp.sh $(GRAYLOG_HOST) $(CEF_PORT)
 
 health:
 	@./scripts/healthcheck.sh $(GRAYLOG_HOST)

@@ -1,6 +1,6 @@
 # Graylog Input Setup
 
-This guide walks through creating a CEF TCP input in Graylog after the stack is running.
+This guide walks through creating the CEF TCP input in Graylog after the stack is running.
 
 ## Prerequisites
 
@@ -35,14 +35,6 @@ Allow ~60 seconds after `docker compose up` for Graylog to finish initializing.
 6. Click **Save**.
 
 7. The input should appear in the list with a **green** running indicator. If it shows red, check that port 5514 is not already in use on the host.
-
----
-
-## Create a CEF UDP Input (optional)
-
-Repeat the steps above but choose **CEF UDP** in the dropdown and use the same port `5514`.
-
-UDP input is useful only if your log source requires it. Prefer TCP for integration tests.
 
 ---
 
